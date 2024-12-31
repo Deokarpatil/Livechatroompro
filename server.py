@@ -1,64 +1,95 @@
 import socket
 import threading
 
-# List to hold all client sockets
-clients = []
+class ChatServer:
+    def __init__(self, host='0.0.0.0', port=5555):
+        """Initialize the chat server with the given host and port."""
+        self.host = host
+        self.port = port
+        self.clients = []  # List to keep track of connected clients
+        self.messages = []  # List to store all messages with their IDs
+        self.message_id_counter = 1  # Message ID counter
 
-# Function to handle communication with clients
-def handle_client(client_socket, client_address):
-    print(f"[NEW CONNECTION] {client_address} connected.")
+        # Initialize the server socket
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind((self.host, self.port))
+        self.server_socket.listen(5)
+        print(f"Server started on {self.host}:{self.port}")
 
-    # Welcome message to the client
-    client_socket.send("Welcome to the chat! Type 'exit' to leave.".encode())
-
-    # Broadcast function to send messages to all connected clients
-    def broadcast_message(message, client_socket):
-        for client in clients:
-            if client != client_socket:  # Don't send the message back to the sender
+    def broadcast(self, message, client_socket, message_id=None):
+        """Sends a message to all clients except the sender."""
+        for client in self.clients:
+            if client != client_socket:
                 try:
-                    client.send(message)
-                except:
+                    # Include message ID for tracking and deleting messages
+                    client.send(f"{message_id}:{message}".encode('utf-8'))
+                except Exception as e:
+                    print(f"Error broadcasting message: {e}")
                     client.close()
-                    clients.remove(client)
+                    self.clients.remove(client)
 
-    # Receive and handle messages from the client
-    while True:
+    def handle_client(self, client_socket):
+        """Handles communication with a connected client."""
+        global message_id_counter
+        
         try:
-            message = client_socket.recv(1024)
-            if not message:  # If client disconnects
-                break
+            # Send welcome message to the client
+            client_socket.send("Welcome to the chat server! Please enter your username: ".encode('utf-8'))
 
-            # If client types 'exit', close the connection
-            if message.decode().lower() == 'exit':
-                print(f"[DISCONNECTED] {client_address} has disconnected.")
-                client_socket.send("You have left the chat.".encode())
-                break
+            # Receive username
+            username = client_socket.recv(1024).decode('utf-8')
+            print(f"{username} has joined the chat.")
 
-            print(f"[{client_address}] {message.decode()}")
-            broadcast_message(message, client_socket)  # Broadcast the message to others
+            # Broadcast that the user has joined
+            self.broadcast(f"{username} has joined the chat.", client_socket, None)
+
+            # Send all previous messages to the client
+            for message_id, message in self.messages:
+                client_socket.send(f"{message_id}:{message}".encode('utf-8'))
+
+            while True:
+                message = client_socket.recv(1024).decode('utf-8')  # Receive a message from the client
+
+                if not message:
+                    break  # Client has disconnected
+
+                if message.startswith("/delete"):
+                    # Delete command format: /delete <message_id>
+                    try:
+                        delete_message_id = int(message.split(" ")[1])
+                        # Remove the message from the list
+                        self.messages = [msg for msg in self.messages if msg[0] != delete_message_id]
+                        print(f"Message ID {delete_message_id} deleted.")
+
+                        # Notify all clients that the message was deleted
+                        self.broadcast(f"Message ID {delete_message_id} has been deleted.", client_socket, None)
+                    except ValueError:
+                        client_socket.send("Invalid message ID for deletion.".encode('utf-8'))
+                else:
+                    # New message: add it to the list and broadcast it
+                    message_id = self.message_id_counter
+                    self.messages.append((message_id, message))
+                    self.message_id_counter += 1
+                    print(f"{username}: {message}")
+                    self.broadcast(f"{username}: {message}", client_socket, message_id)
 
         except Exception as e:
-            print(f"[ERROR] {e}")
-            break
+            print(f"Error handling client: {e}")
+        finally:
+            # Remove the client from the list and close the connection
+            self.clients.remove(client_socket)
+            client_socket.close()
+            print(f"Client {client_socket} disconnected.")
 
-    # Close client connection
-    clients.remove(client_socket)
-    client_socket.close()
-
-# Function to start the server and accept connections
-def start_server():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(("0.0.0.0", 5555))  # Bind to all IPs on port 5555
-    server.listen(5)  # Max number of clients the server can handle simultaneously
-    print("Server started. Listening on port 5555...")
-
-    while True:
-        # Accept a new client connection
-        client_socket, client_address = server.accept()
-        clients.append(client_socket)  # Add client socket to list
-        # Start a new thread for handling the client
-        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
-        client_thread.start()
+    def start_server(self):
+        """Accepts incoming client connections and handles them."""
+        while True:
+            client_socket, client_address = self.server_socket.accept()
+            print(f"New connection from {client_address}")
+            self.clients.append(client_socket)
+            # Create a new thread to handle the client
+            threading.Thread(target=self.handle_client, args=(client_socket,)).start()
 
 if __name__ == "__main__":
-    start_server()
+    chat_server = ChatServer()
+    chat_server.start_server()
