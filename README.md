@@ -52,6 +52,7 @@ Challenge: The original code only had a basic client-server setup, where one cli
 Solution: This was addressed by using the threading module in both the client and server. Each time a client connects to the server, a new thread is spawned to handle that client. This allows the server to communicate with multiple clients simultaneously without blocking.
 
 * 2.Message Parsing and Protocols
+  
 Challenge: In the initial code, messages were sent in raw text format, without a clear structure. This made it difficult to differentiate between types of messages or handle special cases like private messaging or system messages.
 
 Solution: The solution was to introduce structured messages using a simple delimiter (:) to separate the message_id from the actual content of the message. This allowed the server and client to differentiate between different types of information.
