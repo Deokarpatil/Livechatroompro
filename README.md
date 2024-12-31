@@ -43,5 +43,8 @@ Advanced Features like message encryption, user authentication, or file sharing.
 ## How It Works:
 * 1.A server application runs to manage connections and messages.
 * 2.Clients connect to the server using sockets.
-* 3. Messages are exchanged between clients via the server.
-
+* 3.Messages are exchanged between clients via the server.
+## Output
+ ### Sever Screen
+ ### 
+![WhatsApp Image 2024-12-31 at 10 17 55 PM](https://github.com/user-attachments/assets/7cc3ca3d-fff9-448e-b0ea-f605b09909a6)
