@@ -95,6 +95,27 @@ Solution: The solution here involves broadcasting messages to all connected clie
 
 ### Future Scope:
 
+* GUI:
+ Create a user-friendly graphical interface for the chat app.
+ Users can interact with the chat easily through visual elements like text boxes, buttons, and chat windows.
+
+* Multi-Room:
+ Implement multiple chat rooms where users can join and interact in different discussions.
+ Each room has its own set of participants, and messages are only broadcasted to users in the same room.
+
+* Connections with Different Networks:
+ Ensure the server is accessible from various networks using public IPs or DNS addresses.
+
+* Authentication:
+ Implement user authentication with username and password to  ensure secure access to the chat.
+ Store and validate credentials, optionally hashing passwords for added security.
+
+* Private Messages:
+ Allow users to send private messages to specific individuals in the chat.
+
+* File Sharing:
+ Enable file transfers between clients by sending files in chunks through the server.
+ Support multiple file formats, and handle large files efficiently without causing performance issues.
 
 
 
