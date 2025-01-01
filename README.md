@@ -91,7 +91,9 @@ Solution: The solution here involves broadcasting messages to all connected clie
 ## Client vedant "leaved" the chat room and Relogin to Chatroom and display all "Previous" chat in Chatroom and cant see the message deleted previously.
 ## Client: Omkar
 ![image](https://github.com/user-attachments/assets/d8ff1ca9-ecd7-4240-aec1-75c1bf5a3c2d)
-## Client omkar Notify that vedant rejoin the chat.
+## Client omkar Notified that Vedant has Rejoined the Chat.
+
+### Future Scope:
 
 
 
